@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1f1f" />
+  <title>Calculadora de Espejos Esfericos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bitter:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #0f1f1f;
+      --bg-2: #1b3030;
+      --panel: rgba(250, 251, 246, 0.1);
+      --panel-2: rgba(255, 255, 255, 0.06);
+      --text: #f8f7f1;
+      --muted: #b7c5c1;
+      --accent: #f4b942;
+      --accent-2: #62d2c3;
+      --danger: #ff857d;
+      --ok: #8ae66f;
+      --radius: 18px;
+      --shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: "Space Grotesk", sans-serif;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(244, 185, 66, 0.25), transparent 30%),
+        radial-gradient(circle at 85% 20%, rgba(98, 210, 195, 0.22), transparent 25%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+    }
+
+    .wrap {
+      width: min(1180px, 92vw);
+      margin: 28px auto 48px;
+      display: grid;
+      gap: 18px;
+      animation: rise 0.75s ease-out;
+    }
+
+    .hero {
+      border-radius: var(--radius);
+      padding: 24px;
+      background: linear-gradient(130deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Bitter", serif;
+      font-size: clamp(1.5rem, 2.9vw, 2.3rem);
+      letter-spacing: 0.4px;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 70ch;
+      line-height: 1.45;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+
+    .controls {
+      display: grid;
+      padding: 16px;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    label {
+      font-size: 0.92rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(7, 25, 25, 0.5);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.98rem;
+    }
+
+    .formula-toggle {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .formula-toggle label {
+      white-space: normal;
+      overflow: visible;
+      display: inline;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .kpi {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+
+    .kpi h3 {
+      margin: 0;
+      font-size: 0.78rem;
+      letter-spacing: 0.45px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .kpi p {
+      margin: 6px 0 0;
+      font-size: 1rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .canvas-panel {
+      padding: 14px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 460px;
+      display: block;
+      background:
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08)),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.06) 1px,
+          transparent 1px,
+          transparent 36px
+        );
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .note {
+      margin: 10px 0 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .formula-panel {
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .formula-list {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+
+    .formula-item {
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .formula-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-size: 0.88rem;
+    }
+
+    .formula-item code {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--text);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .state-real {
+      color: var(--ok);
+    }
+
+    .state-virtual {
+      color: var(--danger);
+    }
+
+    .field label,
+    .note,
+    .subtitle {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        order: 2;
+      }
+
+      .main {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Calculadora de espejos esfericos (optica geometrica)</h1>
+      <p class="subtitle">
+        Calcula posicion, tamano y tipo de imagen para espejo concavo o convexo.
+        Incluye diagrama de rayos principal, convencion de signos y resumen de formulas.
+      </p>
+    </header>
+
+    <main class="layout">
+      <aside class="panel controls">
+        <div class="field">
+          <label for="mirrorType">Tipo de espejo</label>
+          <select id="mirrorType">
+            <option value="concavo">Concavo (f &gt; 0)</option>
+            <option value="convexo">Convexo (f &lt; 0)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="distanceObject">Distancia objeto do (cm)</label>
+          <input id="distanceObject" type="number" inputmode="decimal" value="30" step="any" min="0.1" />
+        </div>
+
+        <div class="field">
+          <label for="heightObject">Altura objeto ho (cm)</label>
+          <input id="heightObject" type="number" inputmode="decimal" value="5" step="any" min="0.1" />
+        </div>
+
+        <div class="field">
+          <label for="inputMode">Dato optico principal</label>
+          <select id="inputMode">
+            <option value="f">Usar distancia focal f</option>
+            <option value="r">Usar radio de curvatura R</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="focalInput">f (cm, con signo)</label>
+            <input id="focalInput" type="number" inputmode="decimal" value="10" step="any" />
+          </div>
+          <div class="field">
+            <label for="radiusInput">R (cm, con signo)</label>
+            <input id="radiusInput" type="number" inputmode="decimal" value="20" step="any" />
+          </div>
+        </div>
+
+        <div class="formula-toggle">
+          <input id="showConstruction" type="checkbox" checked>
+          <label for="showConstruction">Mostrar rayos de construccion</label>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi">
+            <h3>Distancia imagen di</h3>
+            <p id="outDi">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Altura imagen hi</h3>
+            <p id="outHi">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Aumento m</h3>
+            <p id="outM">-</p>
+          </div>
+          <div class="kpi">
+            <h3>Naturaleza imagen</h3>
+            <p id="outNature">-</p>
+          </div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <section class="panel canvas-panel">
+          <canvas id="diagram" role="img" aria-label="Diagrama de rayos de espejo esferico"></canvas>
+          <p class="note" id="signNote">
+            Convencion cartesiana usada: do positivo para objeto real frente espejo.
+            f positivo concavo, f negativo convexo. di positivo imagen real (frente), di negativo virtual (detras).
+          </p>
+        </section>
+
+        <section class="panel formula-panel">
+          <h2>Formulas principales</h2>
+          <div class="formula-list">
+            <article class="formula-item">
+              <strong>Ecuacion de espejo</strong>
+              <code id="eqMirror">1/f = 1/do + 1/di</code>
+            </article>
+            <article class="formula-item">
+              <strong>Despeje de di</strong>
+              <code id="eqDi">di = (f * do) / (do - f)</code>
+            </article>
+            <article class="formula-item">
+              <strong>Despeje de do</strong>
+              <code id="eqDo">do = (f * di) / (di - f)</code>
+            </article>
+            <article class="formula-item">
+              <strong>Aumento lateral</strong>
+              <code id="eqM">m = hi/ho = -di/do</code>
+            </article>
+            <article class="formula-item">
+              <strong>Altura de imagen</strong>
+              <code id="eqHi">hi = m * ho</code>
+            </article>
+            <article class="formula-item">
+              <strong>Radio y focal</strong>
+              <code id="eqR">R = 2f   y   f = R/2</code>
+            </article>
+            <article class="formula-item">
+              <strong>Potencia optica</strong>
+              <code id="eqP">P = 1/f(metros)</code>
+            </article>
+            <article class="formula-item">
+              <strong>Casos limite</strong>
+              <code>do = f -> di -> infinito, do -> infinito -> di = f</code>
+            </article>
+            <article class="formula-item">
+              <strong>Imagen real/virtual</strong>
+              <code>di &gt; 0 real, di &lt; 0 virtual</code>
+            </article>
+            <article class="formula-item">
+              <strong>Orientacion</strong>
+              <code>m &lt; 0 invertida, m &gt; 0 derecha</code>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const elems = {
+      mirrorType: document.getElementById("mirrorType"),
+      distanceObject: document.getElementById("distanceObject"),
+      heightObject: document.getElementById("heightObject"),
+      inputMode: document.getElementById("inputMode"),
+      focalInput: document.getElementById("focalInput"),
+      radiusInput: document.getElementById("radiusInput"),
+      showConstruction: document.getElementById("showConstruction"),
+      outDi: document.getElementById("outDi"),
+      outHi: document.getElementById("outHi"),
+      outM: document.getElementById("outM"),
+      outNature: document.getElementById("outNature"),
+      canvas: document.getElementById("diagram"),
+      eqMirror: document.getElementById("eqMirror"),
+      eqDi: document.getElementById("eqDi"),
+      eqDo: document.getElementById("eqDo"),
+      eqM: document.getElementById("eqM"),
+      eqHi: document.getElementById("eqHi"),
+      eqR: document.getElementById("eqR"),
+      eqP: document.getElementById("eqP")
+    };
+
+    const ctx = elems.canvas.getContext("2d");
+
+    function updateCanvasSize() {
+      const rect = elems.canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      elems.canvas.width = rect.width * dpr;
+      elems.canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      return { w: rect.width, h: rect.height };
+    }
+
+    function num(value) {
+      const n = Number.parseFloat(value);
+      return Number.isFinite(n) ? n : NaN;
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function formatCm(value) {
+      if (!Number.isFinite(value)) {
+        return "infinito";
+      }
+      return `${value.toFixed(3)} cm`;
+    }
+
+    function worldToScreen(x, y, scale, x0, y0) {
+      return { x: x0 + x * scale, y: y0 - y * scale };
+    }
+
+    function lineThroughPoints(a, b) {
+      const dx = b.x - a.x;
+      if (Math.abs(dx) < 1e-9) {
+        return { vertical: true, x: a.x };
+      }
+      const m = (b.y - a.y) / dx;
+      const c = a.y - m * a.x;
+      return { vertical: false, m, c };
+    }
+
+    function yAt(line, x) {
+      if (line.vertical) {
+        return NaN;
+      }
+      return line.m * x + line.c;
+    }
+
+    function drawArrow(worldX, worldY, color, label, scale, x0, y0) {
+      const base = worldToScreen(worldX, 0, scale, x0, y0);
+      const tip = worldToScreen(worldX, worldY, scale, x0, y0);
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(base.x, base.y);
+      ctx.lineTo(tip.x, tip.y);
+      ctx.stroke();
+
+      const dir = worldY >= 0 ? -1 : 1;
+      ctx.beginPath();
+      ctx.moveTo(tip.x, tip.y);
+      ctx.lineTo(tip.x - 8, tip.y - 12 * dir);
+      ctx.lineTo(tip.x + 8, tip.y - 12 * dir);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = "600 13px Space Grotesk";
+      ctx.fillText(label, tip.x + 10, tip.y - 8 * dir);
+    }
+
+    function drawRay(from, to, color, dashed, scale, x0, y0) {
+      const p1 = worldToScreen(from.x, from.y, scale, x0, y0);
+      const p2 = worldToScreen(to.x, to.y, scale, x0, y0);
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.2;
+      ctx.setLineDash(dashed ? [7, 6] : []);
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function compute() {
+      const doAbs = Math.max(0.001, num(elems.distanceObject.value));
+      const ho = num(elems.heightObject.value);
+      const mode = elems.inputMode.value;
+      const mirrorType = elems.mirrorType.value;
+      const sign = mirrorType === "concavo" ? 1 : -1;
+
+      let f;
+      let r;
+      if (mode === "f") {
+        const userF = num(elems.focalInput.value);
+        const fAbs = Math.max(0.001, Math.abs(Number.isFinite(userF) ? userF : 10));
+        f = sign * fAbs;
+        r = 2 * f;
+        elems.focalInput.value = f.toFixed(4);
+        elems.radiusInput.value = r.toFixed(4);
+      } else {
+        const userR = num(elems.radiusInput.value);
+        const rAbs = Math.max(0.002, Math.abs(Number.isFinite(userR) ? userR : 20));
+        r = sign * rAbs;
+        f = r / 2;
+        elems.radiusInput.value = r.toFixed(4);
+        elems.focalInput.value = f.toFixed(4);
+      }
+
+      let di;
+      const denominator = doAbs - f;
+      if (Math.abs(denominator) < 1e-7) {
+        di = Number.POSITIVE_INFINITY;
+      } else {
+        di = (f * doAbs) / denominator;
+      }
+
+      const m = Number.isFinite(di) ? -di / doAbs : Number.NEGATIVE_INFINITY;
+      const hi = Number.isFinite(m) ? m * ho : Number.NEGATIVE_INFINITY;
+
+      const nature = Number.isFinite(di)
+        ? (di > 0 ? "Real" : "Virtual")
+        : "En infinito";
+
+      const orient = Number.isFinite(m)
+        ? (m < 0 ? "Invertida" : "Derecha")
+        : "No definida";
+
+      const size = Number.isFinite(m)
+        ? (Math.abs(m) > 1 ? "Aumentada" : (Math.abs(m) < 1 ? "Reducida" : "Igual"))
+        : "No definida";
+
+      elems.outDi.textContent = formatCm(di);
+      elems.outHi.textContent = formatCm(hi);
+      elems.outM.textContent = Number.isFinite(m) ? m.toFixed(4) : "infinito";
+      elems.outNature.textContent = `${nature}, ${orient}, ${size}`;
+      elems.outNature.className = di > 0 ? "state-real" : "state-virtual";
+
+      const txtDi = Number.isFinite(di) ? di.toFixed(2) : "∞";
+      const txtM = Number.isFinite(m) ? m.toFixed(2) : "∞";
+      const txtHi = Number.isFinite(hi) ? hi.toFixed(2) : "∞";
+      
+      elems.eqMirror.textContent = `1/${f.toFixed(2)} = 1/${doAbs.toFixed(2)} + 1/${txtDi}`;
+      elems.eqDi.textContent = `di = (${f.toFixed(2)} * ${doAbs.toFixed(2)}) / (${doAbs.toFixed(2)} - ${f.toFixed(2)}) = ${txtDi}`;
+      elems.eqDo.textContent = `do = (${f.toFixed(2)} * ${txtDi}) / (${txtDi} - ${f.toFixed(2)}) = ${doAbs.toFixed(2)}`;
+      elems.eqM.textContent = `m = ${txtHi}/${ho.toFixed(2)} = -(${txtDi})/${doAbs.toFixed(2)} = ${txtM}`;
+      elems.eqHi.textContent = `hi = ${txtM} * ${ho.toFixed(2)} = ${txtHi}`;
+      elems.eqR.textContent = `R = 2*(${f.toFixed(2)}) = ${r.toFixed(2)}  y  f = ${r.toFixed(2)}/2 = ${f.toFixed(2)}`;
+      elems.eqP.textContent = `P = 1/${(f/100).toFixed(4)} = ${(1/(f/100)).toFixed(2)} D`;
+
+      drawScene({
+        doAbs,
+        ho,
+        f,
+        r,
+        di,
+        hi,
+        showConstruction: elems.showConstruction.checked
+      });
+    }
+
+    function drawScene(data) {
+      const { doAbs, ho, f, r, di, hi, showConstruction } = data;
+      const { w, h } = updateCanvasSize();
+
+      ctx.clearRect(0, 0, w, h);
+
+      const axisY = h * 0.58;
+      const mirrorX = w * 0.60;
+
+      const maxDist = Math.max(20, doAbs * 1.3, Math.abs(f) * 2.5, Number.isFinite(di) ? Math.abs(di) * 1.3 : 0);
+      const scale = (w * 0.5) / maxDist;
+
+      const x0 = mirrorX;
+      const y0 = axisY;
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.74)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(20, axisY);
+      ctx.lineTo(w - 20, axisY);
+      ctx.stroke();
+
+      const mirrorMaxY = Math.max(Math.abs(ho), Number.isFinite(hi) ? Math.abs(hi) : 0, Math.abs(r)*0.4) * 1.4;
+      const steps = 40;
+      
+      ctx.strokeStyle = "#f4b942";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      for (let i = -steps; i <= steps; i++) {
+        const wy = (i / steps) * mirrorMaxY;
+        const wx = -(wy * wy) / (2 * r);
+        const p = worldToScreen(wx, wy, scale, x0, y0);
+        if (i === -steps) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = "#f4b942";
+      ctx.font = "700 12px Space Grotesk";
+      const lblPt = worldToScreen(-(mirrorMaxY*mirrorMaxY)/(2*r), mirrorMaxY, scale, x0, y0);
+      ctx.fillText("Espejo", lblPt.x - 20, lblPt.y - 12);
+
+      const fPoint = { x: -f, y: 0 };
+      const cPoint = { x: -r, y: 0 };
+
+      [
+        { pt: fPoint, label: "F", color: "#62d2c3" },
+        { pt: cPoint, label: "C", color: "#9ce5dc" },
+        { pt: { x: 0, y: 0 }, label: "V", color: "#f8f7f1" }
+      ].forEach(({ pt, label, color }) => {
+        const p = worldToScreen(pt.x, pt.y, scale, x0, y0);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.font = "700 12px Space Grotesk";
+        ctx.fillText(label, p.x + 7, p.y - 7);
+      });
+
+      const objTop = { x: -doAbs, y: ho };
+      drawArrow(objTop.x, objTop.y, "#8ae66f", "Objeto", scale, x0, y0);
+
+      let imgTop = null;
+      if (Number.isFinite(di) && Number.isFinite(hi)) {
+        imgTop = { x: -di, y: hi };
+        drawArrow(imgTop.x, imgTop.y, "#ff857d", "Imagen", scale, x0, y0);
+      }
+
+      if (showConstruction) {
+        const obj = objTop;
+        const rx1 = -(ho * ho) / (2 * r);
+        const m1 = { x: rx1, y: ho };
+
+        // Rayo 1 (azul): Paralelo
+        drawRay(obj, m1, "#8bc6ff", false, scale, x0, y0);
+
+        if (Number.isFinite(di) && Number.isFinite(hi)) {
+          // Reflejado pasa por/desde M1
+          const line1 = lineThroughPoints(m1, imgTop);
+          drawRay(m1, { x: -maxDist, y: yAt(line1, -maxDist) }, "#8bc6ff", false, scale, x0, y0);
+          if (di < 0) drawRay(m1, imgTop, "#8bc6ff", true, scale, x0, y0);
+
+          // Rayo 2 (amarillo): Por el foco
+          const rx2 = -(hi * hi) / (2 * r);
+          const m2 = { x: rx2, y: hi };
+          
+          drawRay(obj, m2, "#f9f871", false, scale, x0, y0);
+          drawRay(m2, { x: -maxDist, y: hi }, "#f9f871", false, scale, x0, y0);
+          if (di < 0) drawRay(m2, imgTop, "#f9f871", true, scale, x0, y0);
+        } else {
+          // Caso al infinito
+          const line1 = lineThroughPoints(m1, { x: -f, y: 0 });
+          drawRay(m1, { x: -maxDist, y: yAt(line1, -maxDist) }, "#8bc6ff", false, scale, x0, y0);
+
+          // Rayo al vertice como alternativa
+          const m2 = { x: 0, y: 0 };
+          drawRay(obj, m2, "#f9f871", false, scale, x0, y0);
+          const line2 = lineThroughPoints(m2, { x: -doAbs, y: -ho });
+          drawRay(m2, { x: -maxDist, y: yAt(line2, -maxDist) }, "#f9f871", false, scale, x0, y0);
+        }
+      }
+
+      ctx.fillStyle = "rgba(248, 247, 241, 0.88)";
+      ctx.font = "12px Space Grotesk";
+      ctx.fillText("Eje principal", 30, axisY - 8);
+      ctx.fillText("Lado objeto", 30, 24);
+      ctx.fillText("Detras espejo", mirrorX + 20, 24);
+    }
+
+    [
+      elems.mirrorType,
+      elems.distanceObject,
+      elems.heightObject,
+      elems.inputMode,
+      elems.focalInput,
+      elems.radiusInput,
+      elems.showConstruction
+    ].forEach((el) => {
+      el.addEventListener("input", compute);
+      el.addEventListener("change", compute);
+    });
+
+    window.addEventListener("resize", compute);
+
+    compute();
+  </script>
+</body>
+</html>
